@@ -8,10 +8,16 @@
     num1 db ?
     num2 db ?
     unidades db ?
-    decenas db ?
+    decenas db ? 
+    
+    
     
   ;Variables string  
+    ;Lineas 
+    linea_h db '-','$'
+    linea_v db '|','$'
     
+    ;String comunes
     msg_juegos db 'Menu de juego','$'
     encabezado db 'Nombre de los integrantes: Esteban Rodriguez vargas, Mauricio Leon Bermudez','$' 
     encabezado2 db 'Segundo semestre 2022','$'
@@ -22,7 +28,10 @@
     seleccion db 'Por favor, seleccione una opcion: ','$'
     error db 'ERROR: Opcion seleccionada incorrecta: ','$' 
     empezar_partida db 'Iniciar partida(1) ','$'
-    opcion_guardar_resul db 'Guardar el resultado del ganador(2)','$'
+    opcion_guardar_resul db 'Guardar el resultado del ganador(2)','$' 
+    nombre_1 db 'Ingrese nombre del jugador 1: ','$'
+    nombre_2 db 'Ingrese nombre del jugador 2: ','$' 
+    nombre1 db 100 dup ('$')
     
     
     
@@ -66,7 +75,7 @@
       int 10h
       
       
-      ;Mosstrando opcion de juego en pantalla
+      ;Mostrando opcion de juego en pantalla
       mov ah, 09h
       lea dx, opcion_juego
       int 21h
@@ -78,7 +87,7 @@
       mov ah,2  ;Servicio 
       int 10h  
       
-      ;Mosstrando opcion de archivo .txt en pantalla
+      ;Mostrando opcion de archivo .txt en pantalla
       mov ah, 09h
       lea dx, opcion_txt
       int 21h   
@@ -90,7 +99,7 @@
       mov ah,2  ;Servicio 
       int 10h 
       
-      ;Mosstrando opcion de salir en pantalla
+      ;Mostrando opcion de salir en pantalla
       mov ah, 09h
       lea dx, salir
       int 21h
@@ -102,7 +111,7 @@
       mov ah,2  ;Servicio 
       int 10h 
       
-      ;Mosstrando opcion de seleccionar en pantalla
+      ;Mostrando opcion de seleccionar en pantalla
       mov ah, 09h
       lea dx, seleccion
       int 21h 
@@ -208,9 +217,10 @@
         je opcion_salir
         jmp mensaje_error  
       
-       
-      
-     ;Iniciar partida 
+         
+        
+        
+        
      
     
      ;Opcion de guardar el resultado del ganador 
@@ -242,8 +252,53 @@
     
 
   inico_juego:
+  ;Primero limpiar pantalla 
+
+        mov ah,0Fh ;Servicio
+        int 10h
+        mov ah,0
+        int 10h
+        
+        ;Solicitar ingreso de nombres
+        mov ah, 09h
+        lea dx, nombre_1
+        int 21h  
+        
+        ;Inicio de ingreso nombre 1
+        mov si, 00h
+        leer:
+        
+          mov ax, 0000
+          mov ah, 01h
+          int 21h
+          ;Se guarda el valor tecleado por el usuario en la posicion 'si' del vector
+          mov nombre1[si],al
+          inc si ; Incrementar nuestro contador
+          cmp al,0dh ;Se repite el ingreso de datos hasta que se teclee un Enter 
+          ja leer
+          jb leer  
+          
+        ver: 
+          mov dx,offset nombre1 ;Imprime el contenido del vector con la misma instruccion de una cadena
+          mov ah, 09h
+          int 21h 
+          
+          ;Hace salto de linea
+          mov bh,0      ; Indico pagina
+          mov dh,3      ; Indico renglon
+          mov dl,0      ; Indico columna
+          mov ah,2      ; Servicio
+          int 10h  
+          
+          mov ah, 01h
+          int 21h
+          
+          
+        
+        
+        
   
-  
+            
   
   
   mensaje_error:
