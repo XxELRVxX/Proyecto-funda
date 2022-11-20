@@ -35,7 +35,7 @@
     nombre2 db 100 dup ('$') 
     jugador_1 db 'El simbolo del jugador 1 es la X y su nombre es: ','$'
     jugador_2 db 'El simbolo del jugador 2 es el O y su nombre es: ','$'
-    
+    press_enter db 'Presione ENTER','$'
     
     
     
@@ -341,13 +341,88 @@
           mov ah, 09h
           int 21h
           
+          ;Hace salto de linea
+          mov bh,0      ; Indico pagina
+          mov dh,6      ; Indico renglon
+          mov dl,0      ; Indico columna
+          mov ah,2      ; Servicio
+          int 10h
+          
+          ;Mensaje que solcita que presione enter el usuario
+          mov ah, 09h
+          lea dx, press_enter
+          int 21h
+          
+          ;Instruccion para esperar que se presione enter
           mov ah, 01h
           int 21h
           
+          ;Limpiar pantalla
+            mov ah,0Fh ;Servicio
+            int 10h
+            mov ah,0
+            int 10h 
           
           
+          
+          
+  gato:   
+    
+    ;Modo video
+    mov ah, 0 ;Configurar modo 
+    mov al, 13h ;320x200 Pixeles, 256 colores
+    int 10h ;Set del modo video
+    
+    mov ah, 0ch ;Configura para un solo pixel
+    mov al, 0fh ;Color negro
+      
+    mov dx, 10 ;Coordenada del renglon
+    mov cx, 220 ;Coordenada del renglon
+    Linea1: 
+        inc dx ;Incremento coordenada   
+        int 10h ;Set del color del pixel
+        cmp dx, 110 ;Valor maximo
+        jne Linea1 ;Brinca si no es cero
         
-  
+    mov dx, 10 ;Coordenada del renglon
+    mov cx, 120
+    
+    Linea2:   
+        inc dx ;Incremento coordenada
+        int 10h ;Set del color del pixel
+        cmp dx, 110 ;Valor maximo
+        jne Linea2 ;Brinca si no es cero
+        
+    mov dx, 40      
+    mov cx, 50
+    
+    Linea3:
+        inc cx ;Incrementa coordenada
+        int 10h; Set del color del pixel
+        cmp cx, 280
+        jne Linea3
+    
+    mov dx, 80      
+    mov cx, 50
+        
+    Linea4:
+        inc cx ;Incrementa coordenada
+        int 10h; Set del color del pixel
+        cmp cx, 280
+        jne Linea4
+    
+    ;Hace salto de linea
+          mov bh,0      ; Indico pagina
+          mov dh,20      ; Indico renglon
+          mov dl,0      ; Indico columna
+          mov ah,2      ; Servicio
+          int 10h
+              
+    ;Mostrar mensaje de error
+    mov ah,09h
+    lea dx,error
+    int 21h
+        
   mensaje_error:
     ;Limpiar pantalla
     mov ah,0Fh ;Servicio
