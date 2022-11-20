@@ -32,6 +32,9 @@
     nombre_1 db 'Ingrese nombre del jugador 1: ','$'
     nombre_2 db 'Ingrese nombre del jugador 2: ','$' 
     nombre1 db 100 dup ('$')
+    nombre2 db 100 dup ('$') 
+    jugador_1 db 'El simbolo del jugador 1 es la X y su nombre es: ','$'
+    jugador_2 db 'El simbolo del jugador 2 es el O y su nombre es: ','$'
     
     
     
@@ -277,8 +280,47 @@
           cmp al,0dh ;Se repite el ingreso de datos hasta que se teclee un Enter 
           ja leer
           jb leer  
-          
+        
+        ;Limpiar pantalla
+        mov ah,0Fh ;Servicio
+        int 10h
+        mov ah,0
+        int 10h  
+        
+        ;Solicitar ingreso de nombre 2
+        mov ah, 09h
+        lea dx, nombre_2
+        int 21h  
+        
+        ;Inicio de ingreso nombre 2
+        mov si, 00h 
+        
+        leer1:
+        
+          mov ax, 0000
+          mov ah, 01h
+          int 21h
+          ;Se guarda el valor tecleado por el usuario en la posicion 'si' del vector
+          mov nombre2[si],al
+          inc si ; Incrementar nuestro contador
+          cmp al,0dh ;Se repite el ingreso de datos hasta que se teclee un Enter 
+          ja leer1
+          jb leer1
+        
+        ;Limpiar pantalla
+        mov ah,0Fh ;Servicio
+        int 10h
+        mov ah,0
+        int 10h
+        
+
         ver: 
+          
+          ;Mostrar jugador 1
+          mov ah, 09h
+          lea dx, jugador_1
+          int 21h
+        
           mov dx,offset nombre1 ;Imprime el contenido del vector con la misma instruccion de una cadena
           mov ah, 09h
           int 21h 
@@ -290,16 +332,21 @@
           mov ah,2      ; Servicio
           int 10h  
           
+          ;Mostrar jugador 2
+          mov ah, 09h
+          lea dx, jugador_2
+          int 21h
+          
+          mov dx,offset nombre2 ;Imprime el contenido del vector con la misma instruccion de una cadena
+          mov ah, 09h
+          int 21h
+          
           mov ah, 01h
           int 21h
           
           
+          
         
-        
-        
-  
-            
-  
   
   mensaje_error:
     ;Limpiar pantalla
