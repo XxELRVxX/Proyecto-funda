@@ -8,14 +8,22 @@
     num1 db ?
     num2 db ?
     unidades db ?
-    decenas db ? 
+    decenas db ?
+    turno db 1
+    mouse_x db ?
+    mouse_y db ?
+     
     
     
     
   ;Variables string  
     ;Lineas 
     linea_h db '-','$'
-    linea_v db '|','$'
+    linea_v db '|','$' 
+    
+    ;Simbolos
+    simb_1 db 'X','$'  
+    simb_2 db 'O','$'
     
     ;String comunes
     msg_juegos db 'Menu de juego','$'
@@ -35,6 +43,9 @@
     nombre2 db 100 dup ('$') 
     jugador_1 db 'El simbolo del jugador 1 es la X y su nombre es: ','$'
     jugador_2 db 'El simbolo del jugador 2 es el O y su nombre es: ','$'
+    expl_tunro db 'El turno es del jugador ','$'
+    turnoi db '1','$'
+    turno_2 db '2','$' 
     press_enter db 'Presione ENTER','$'
     
     
@@ -416,12 +427,54 @@
           mov dh,20      ; Indico renglon
           mov dl,0      ; Indico columna
           mov ah,2      ; Servicio
-          int 10h
+          int 10h                                                                                                         
               
-    ;Mostrar mensaje de error
+    ;Mostrar mensaje de de turno
     mov ah,09h
-    lea dx,error
+    lea dx,expl_tunro
     int 21h
+    
+    mov ah,09h
+    lea dx, turnoi
+    int 21h
+    
+    Inicio_cursor:
+      mov ax,0 ;Activar cursor con instruccion 0
+      int 33h ;interrupcion para acceder al hardware
+      mov ax,1 ;mostrar cursor con instruccion 1
+      int 33h ;interupcion para acceder al hardware 
+      
+    boton:
+      mov ax,3 ;Leer posicion y accion con raton con instruccion 3
+      int 33h ;Interrupcion para acceder al hardware
+      shr cx, 1    ;Modo video al doble se divide x entre 2
+      cmp bx, 0    ;Compara raton inactivo
+      je na
+      cmp bx, 1    ;Compara con click izquierdo
+      je poner_simbolo
+                 
+                 
+    poner_simbolo:
+      cmp turno, 1
+      je poner_x
+      jmp poner_O  
+      
+    poner_X:
+      mov ah, 09h
+      lea dx, simb_1
+      int 21h 
+      
+    
+    poner_O:   
+                
+                                                                         
+       
+      
+  ;Etiqueta de mouse inactivo 
+  na:
+  jmp boton
+      
+      
         
   mensaje_error:
     ;Limpiar pantalla
