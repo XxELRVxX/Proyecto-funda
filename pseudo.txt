@@ -2,7 +2,7 @@
 	-Nombre del estudiante, año, etc                          LISTO
 2- Opcionnes de juego
 	Opcion para jugar/volver a jugar                          LISTO   
-		Iniciar partida
+		Iniciar partida                                   LISTO
 		Volver a jugar solo en post partida
 	Opcion para guardar el resultado del ganador
 		Esto despues de terminar una partida
@@ -17,6 +17,6 @@
 
 CARACTERISTICAS REQUERIDAS
 
--Uso de modo de video
--Uso de mouse
--Manejo de archivos
+-Uso de modo de video  LISTO
+-Uso de mouse          LISTO
+-Manejo de archivos    LISTO
