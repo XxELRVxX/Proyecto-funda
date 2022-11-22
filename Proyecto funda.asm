@@ -44,7 +44,7 @@
     nombre_2 db 'Ingrese nombre del jugador 2: ','$' 
     nombre1 db 100 dup ('$')
     nombre2 db 100 dup ('$') 
-    jugador_1 db 'El simbolo del jugador 1 es la  y su nombre es: ','$'
+    jugador_1 db 'El simbolo del jugador 1 es la X y su nombre es: ','$'
     jugador_2 db 'El simbolo del jugador 2 es el O y su nombre es: ','$'
     press_enter db 'Presione ENTER','$'
     simbolo_player1 db 'X','$'
