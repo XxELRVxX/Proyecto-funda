@@ -21,6 +21,19 @@
     
 
     
+  ;Variables del guardado del archivo
+  ruta db 'C',':','\','$',00h ;especificar directorio del archivo
+  mg db 10,13, "Ingresa nombre del archivo: $"
+  mg2 db 10,13, "Ingresa nombre con el que quieres aparecer: $"
+  msg4 db 10,13, "Archivo creado: $" 
+  decision1 db 10,13, "Estas seguro de que quieres agregar este cambio S/N: $"  
+  texto db 10,13, "Contenido: $"
+  exito db 10,13, "Exito: $"
+  nombre_txt db 13 dup('$') 
+  handle dw 0
+  aux dw 0
+  vec db 50 dup('$')   
+  
     
     
   ;Variables string  
@@ -39,7 +52,9 @@
     seleccion db 'Por favor, seleccione una opcion: ','$'
     error db 'ERROR: Opcion seleccionada incorrecta: ','$' 
     empezar_partida db 'Iniciar partida(1) ','$'
-    opcion_guardar_resul db 'Guardar el resultado del ganador(2)','$' 
+    opcion_volver_jugar db 'Volver a jugar(1)','$'
+    opcion_guardar_resul db 'Guardar el resultado del ganador(2)','$'
+    opcion_crear_archivo db 'Crear archivo (para primer partida)(3)','$' 
     nombre_1 db 'Ingrese nombre del jugador 1: ','$'
     nombre_2 db 'Ingrese nombre del jugador 2: ','$' 
     nombre1 db 100 dup ('$')
@@ -236,16 +251,43 @@
         jmp mensaje_error  
       
          
-        
-        
-        
-     
-    
-     ;Opcion de guardar el resultado del ganador 
+ 
   
   
   ;Opcion de mostrar el .TXT con los resultados del ganador
   menu_txt:
+  ;Proceso de leer
+    mov ah, 09
+    mov dx,offset mg
+    int 21h
+    mov si, 3
+    call ciclo
+    
+    abrir:
+    mov ah,3dh ;Instrucion para abrir el archivo
+    mov al, 0h  ;0h solo lectura, 1h solo escritura
+    mov dx,offset ruta 
+    int 21h
+    mov handle, ax
+    
+    ;Leer archivo
+    mov ah, 3fh ;Lectura del archivo
+    mov bx, handle
+    mov dx, offset vec
+    mov cx, aux
+    int 21h
+    
+    mov ah,09h
+    mov dx, offset texto
+    int 21h
+    
+    mov ah,09h
+    mov dx, offset vec
+    int 21h
+    
+    mov ah, 3eh ;Cierre de archivo 
+    int 21h
+    jmp fin
     
   ;Opcion de salir
   opcion_salir:
@@ -1359,7 +1401,7 @@ ganador_jugador1:
       mov ah, 01h
       int 21h
       
-      jmp fin  
+      jmp post_partida1  
 
 ganador_jugador2:
       ;Primero limpiar pantalla 
@@ -1391,9 +1433,162 @@ ganador_jugador2:
       mov ah, 01h
       int 21h
       
-      jmp fin
+      jmp post_partida1
       
-     
+;-------------------------Definir opciones post partida para ganador jugador 1-----------------------------------------------------------------------------------------------
+  
+  
+post_partida1:
+  
+  ;Primero limpiar pantalla 
+
+  mov ah,0Fh ;Servicio
+  int 10h
+  mov ah,0
+  int 10h 
+  
+  
+  ;Mostrar opcion de jugar de nuevo en pantalla
+  mov ah, 09h
+  lea dx, opcion_volver_jugar
+  int 21h 
+         
+  ;Salto de linea
+  mov bh,0  ;Pagina
+  mov dh,2  ;Renglon
+  mov dl,0  ;Columna
+  mov ah,2  ;Servicio 
+  int 10h 
+  
+  ;Mostrar opcion de guardar resultado
+  mov ah, 09h
+  lea dx, opcion_guardar_resul
+  int 21h
+          
+  ;Salto de linea
+  mov bh,0  ;Pagina
+  mov dh,4  ;Renglon
+  mov dl,0  ;Columna
+  mov ah,2  ;Servicio 
+  int 10h  
+  
+  ;Mostrar opcion de crar archivo
+  mov ah, 09h
+  lea dx, opcion_crear_archivo
+  int 21h
+  
+  ;Salto de linea
+  mov bh,0  ;Pagina
+  mov dh,7  ;Renglon
+  mov dl,0  ;Columna
+  mov ah,2  ;Servicio 
+  int 10h
+  
+  ;Mostrando opcion de seleccionar en pantalla
+  mov ah, 09h
+  lea dx, seleccion
+  int 21h 
+  
+  ;Se define la opcion seleccionada
+  mov ah,01h    ; Aca se ingresa la opcion a seleccionar
+  int 21h
+  sub al,30h ; En esta linea se arregla lo del codigo ASCII
+  mov opcion,al   ; En esta linea se guarda el valor de entrada en la variable de opcion del menu
+  
+  
+  ;Realizar la comparacion 
+      mov al, opcion 
+      mov bl, 1
+      cmp al, bl
+      je inico_juego 
+      mov bl, 2
+      cmp al, bl 
+      je guardar_resultado1
+      mov bl, 3
+      cmp al,bl
+      je crear_archivo
+      jmp mensaje_error
+               
+          
+          
+  guardar_resultado1:
+  ;proceso de actualizar
+    mov ah, 09h
+    lea dx,mg2 ;Imprimir mensaje
+    int 21h
+    mov si, 0
+    
+    pedir:
+    mov ah, 01h
+    int 21h
+    mov vec[si],al
+    inc si
+    cmp al, 0dh
+    ja pedir
+    jb pedir
+    
+    mov ah, 09h
+    lea dx, decision1 ;Imprimir mensaje
+    int 21h
+    mov ah,01h ;Solicitamos digito para elegir opcion 
+    int 21h
+    mov opcion, al
+    mov ah,02h
+    mov dl,0ah ;salto de linea
+    int 21h
+    cmp opcion, 110
+    je fin
+    
+    editar:
+    ;Abrir archivo
+    push si
+    mov si,3
+    mov ah, 09h
+    lea dx, mg ;imprimir mensaje
+    int 21h
+    call ciclo
+    pop si
+    mov ah,3dh
+    mov al, 1h ;Abrimos archivo en solo escritura
+    mov dx,offset ruta
+    int 21h
+    jc fin ;Si hubo un error 
+    
+    
+    ;Escritura de archivo
+    
+    mov bx,ax ;mover hadfile
+    mov cx,si ;num de caracteres a grabar
+    mov dx, offset vec
+    mov ah,40h
+    int 21h
+    cmp cx,ax
+    jne fin ;error salir
+    mov ah,3eh ;Ciere de archivo
+    int 21h
+    mov ah, 09h
+    lea dx, exito ;imprimir mensaje
+    int 21h
+    jmp fin
+  
+    
+ 
+  
+;-------------------------Definir opciones post partida para ganador jugador 2--------------------------------------------------------------------------------  
+          
+  ;Mensaje que solcita que presione enter el usuario
+  mov ah, 09h
+  lea dx, press_enter
+  int 21h
+      
+  ;Instruccion para esperar que se presione enter
+  mov ah, 01h
+  int 21h
+      
+  jmp fin       
+
+
+;-----------------------------------------------------------------------------------------------------------------------------------     
   mensaje_error:
     ;Limpiar pantalla
     mov ah,0Fh ;Servicio
@@ -1407,6 +1602,56 @@ ganador_jugador2:
     int 21h
       
     jmp fin
+
+;-------------------------Crear el archivo---------------------------------------------------------------------------------------------------------
+
+  crear_archivo:
+  ;proceso de crear
+    mov ah,09
+    mov dx, offset mg
+    int 21h
+    
+    mov si, 3
+    call ciclo
+    
+    
+    mov ah,3ch
+    mov cx,0
+    mov dx, offset ruta 
+    int 21h
+    mov handle,ax 
+    
+    mov bx,ax
+    mov ah,3eh
+    int 21h 
+    
+    mov ah, 09h
+    lea dx, msg4
+    int 21h
+    jmp fin
+    
+    
+    ciclo:
+    mov ah, 1h
+    int 21h
+    
+    cmp al, 13d
+    je terminar 
+    cmp si, 16
+    je terminar
+    mov ruta[si], al
+    inc si
+    jb ciclo
+    terminar:
+    mov ruta[si], 0
+    ret
+  
+
+
+
+
+
+
 
 
   fin:
